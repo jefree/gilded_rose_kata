@@ -28,12 +28,8 @@ def function_1_false_true_true(item)
 end
 
 def function_1_false_true_true_true(item)
-  if item.sell_in < 11
-    item.quality += 1
-  end
-  if item.sell_in < 6
-    item.quality += 1
-  end
+  item.sell_in < 11 && item.quality += 1
+  item.sell_in < 6 && item.quality += 1
 end
 
 def function_1(item)
@@ -41,29 +37,31 @@ def function_1(item)
 end
 
 def function_2(item)
-  if item.name != 'Sulfuras, Hand of Ragnaros'
-    item.sell_in -= 1
-  end
+  item.name != 'Sulfuras, Hand of Ragnaros' && item.sell_in -= 1
+end
+
+def function_3_true(item)
+  item.name != "Aged Brie" ? function_3_true_true(item) : function_3_true_false(item)
+end
+
+def function_3_true_true(item)
+  item.name != 'Backstage passes to a TAFKAL80ETC concert' ? function_3_true_true_true(item) : function_3_true_true_false(item)
+end
+
+def function_3_true_true_true(item)
+  (item.quality > 0 && item.name != 'Sulfuras, Hand of Ragnaros') && item.quality -= 1
+end
+
+def function_3_true_true_false(item)
+  item.quality = 0
+end
+
+def function_3_true_false(item)
+  item.quality < 50 && item.quality += 1
 end
 
 def function_3(item)
-  if item.sell_in < 0
-    if item.name != "Aged Brie"
-      if item.name != 'Backstage passes to a TAFKAL80ETC concert'
-        if item.quality > 0
-          if item.name != 'Sulfuras, Hand of Ragnaros'
-            item.quality -= 1
-          end
-        end
-      else
-        item.quality = item.quality - item.quality
-      end
-    else
-      if item.quality < 50
-        item.quality += 1
-      end
-    end
-  end
+  item.sell_in < 0 && function_3_true(item)
 end
 
 # DO NOT CHANGE THINGS BELOW -----------------------------------------
