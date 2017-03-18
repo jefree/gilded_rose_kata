@@ -10,7 +10,7 @@ def update_item_quality(item)
   update_quality_actions = {
     'Aged Brie' => lambda {|item| increase_quality(item) },
     'Backstage passes to a TAFKAL80ETC concert' => lambda {|item| increase_quality_backstage(item) },
-    'Sulfuras, Hand of Ragnaros' => lambda {|item| decrease_quality(item) },
+    'Sulfuras, Hand of Ragnaros' => lambda {|item| nil },
     'NORMAL ITEM' => lambda {|item| decrease_quality(item) }
   }
 
@@ -32,36 +32,25 @@ def update_expired_sell_in(item)
   update_expired_actions = {
     'Aged Brie' => lambda {|item|  increase_quality(item) },
     'Backstage passes to a TAFKAL80ETC concert' => lambda {|item| item.quality = 0 },
-    'Sulfuras, Hand of Ragnaros' => lambda {|item| decrease_quality(item) },
+    'Sulfuras, Hand of Ragnaros' => lambda {|item| nil },
     'NORMAL ITEM' => lambda {|item| decrease_quality(item) }
   }
 
-  if item.sell_in < 0
-    update_expired_actions[item.name].call(item)
-  end
+  update_expired_actions[item.name].call(item) if item.sell_in < 0
 end
 
 def increase_quality(item)
-  item.quality < 50 && item.quality += 1
+  item.quality += 1 if item.quality < 50
 end
 
 def increase_quality_backstage(item)
   increase_quality(item)
-
-  if item.sell_in < 11
-    increase_quality(item)
-  end
-  if item.sell_in < 6
-    increase_quality(item)
-  end
+  increase_quality(item) if item.sell_in < 11
+  increase_quality(item) if item.sell_in < 6
 end
 
 def decrease_quality(item)
- if item.quality > 0
-   if item.name != 'Sulfuras, Hand of Ragnaros'
-     item.quality -= 1
-   end
- end
+  item.quality -= 1 if item.quality > 0
 end
 
 def decrease_sell_in(item)
