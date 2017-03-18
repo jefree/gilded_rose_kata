@@ -1,67 +1,71 @@
 def update_quality(items)
   items.each do |item|
-    function_1(item)
-    function_2(item)
-    function_3(item)
+    update_item_quality(item)
+    update_sell_in(item)
+    update_expired_sell_in(item)
   end
 end
 
-def function_1_true(item)
-  (item.quality > 0 && item.name != 'Sulfuras, Hand of Ragnaros') && function_1_true_true(item)
+def update_item_quality(item)
+  update_quality_actions = {
+    'Aged Brie' => lambda {|item| increase_quality(item) },
+    'Backstage passes to a TAFKAL80ETC concert' => lambda {|item| increase_quality_backstage(item) },
+    'Sulfuras, Hand of Ragnaros' => lambda {|item| decrease_quality(item) },
+    'NORMAL ITEM' => lambda {|item| decrease_quality(item) }
+  }
+
+  update_quality_actions[item.name].call(item)
 end
 
-def function_1_false_true(item)
-  item.quality += 1
-  (item.name == 'Backstage passes to a TAFKAL80ETC concert') && function_1_false_true_true(item)
+def update_sell_in(item)
+  update_sell_in_actions = {
+    'Aged Brie' => lambda {|item|  decrease_sell_in(item) },
+    'Backstage passes to a TAFKAL80ETC concert' => lambda {|item| decrease_sell_in(item) },
+    'Sulfuras, Hand of Ragnaros' => lambda {|item| nil },
+    'NORMAL ITEM' => lambda {|item| decrease_sell_in(item) }
+  }
+
+  update_sell_in_actions[item.name].call(item)
 end
 
-def function_1_false(item)
-  item.quality < 50 && function_1_false_true(item)
+def update_expired_sell_in(item)
+  update_expired_actions = {
+    'Aged Brie' => lambda {|item|  increase_quality(item) },
+    'Backstage passes to a TAFKAL80ETC concert' => lambda {|item| item.quality = 0 },
+    'Sulfuras, Hand of Ragnaros' => lambda {|item| decrease_quality(item) },
+    'NORMAL ITEM' => lambda {|item| decrease_quality(item) }
+  }
+
+  if item.sell_in < 0
+    update_expired_actions[item.name].call(item)
+  end
 end
 
-def function_1_true_true(item)
-  item.quality -= 1
-end
-
-def function_1_false_true_true(item)
-  item.quality < 50 && function_1_false_true_true_true(item)
-end
-
-def function_1_false_true_true_true(item)
-  item.sell_in < 11 && item.quality += 1
-  item.sell_in < 6 && item.quality += 1
-end
-
-def function_1(item)
-  (item.name != 'Aged Brie' && item.name != 'Backstage passes to a TAFKAL80ETC concert') ? function_1_true(item) : function_1_false(item)
-end
-
-def function_2(item)
-  item.name != 'Sulfuras, Hand of Ragnaros' && item.sell_in -= 1
-end
-
-def function_3_true(item)
-  item.name != "Aged Brie" ? function_3_true_true(item) : function_3_true_false(item)
-end
-
-def function_3_true_true(item)
-  item.name != 'Backstage passes to a TAFKAL80ETC concert' ? function_3_true_true_true(item) : function_3_true_true_false(item)
-end
-
-def function_3_true_true_true(item)
-  (item.quality > 0 && item.name != 'Sulfuras, Hand of Ragnaros') && item.quality -= 1
-end
-
-def function_3_true_true_false(item)
-  item.quality = 0
-end
-
-def function_3_true_false(item)
+def increase_quality(item)
   item.quality < 50 && item.quality += 1
 end
 
-def function_3(item)
-  item.sell_in < 0 && function_3_true(item)
+def increase_quality_backstage(item)
+  increase_quality(item)
+
+  if item.sell_in < 11
+    increase_quality(item)
+  end
+  if item.sell_in < 6
+    increase_quality(item)
+  end
+end
+
+def decrease_quality(item)
+ if item.quality > 0
+   if item.name != 'Sulfuras, Hand of Ragnaros'
+     item.quality -= 1
+   end
+ end
+end
+
+def decrease_sell_in(item)
+  item.sell_in -= 1
 end
 
 # DO NOT CHANGE THINGS BELOW -----------------------------------------
