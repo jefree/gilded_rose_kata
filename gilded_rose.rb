@@ -1,60 +1,92 @@
 def update_quality(items)
   items.each do |item|
-    update_item_quality(item)
-    update_sell_in(item)
-    update_expired_sell_in(item)
+    create_updater(item).update
   end
 end
 
-def update_item_quality(item)
-  update_quality_actions = {
-    'Aged Brie' => lambda {|item| increase_quality(item) },
-    'Backstage passes to a TAFKAL80ETC concert' => lambda {|item| increase_quality_backstage(item) },
-    'Sulfuras, Hand of Ragnaros' => lambda {|item| nil },
-    'NORMAL ITEM' => lambda {|item| decrease_quality(item) }
+def create_updater(item)
+  updaters = {
+    'Aged Brie' => AgedBrieUpdater,
+    'Backstage passes to a TAFKAL80ETC concert' => BackstageUpdater,
+    'Sulfuras, Hand of Ragnaros' => SulfurusUpdater,
+    'NORMAL ITEM' => NormalItemUpdater
   }
 
-  update_quality_actions[item.name].call(item)
+  updaters[item.name].new(item)
 end
 
-def update_sell_in(item)
-  update_sell_in_actions = {
-    'Aged Brie' => lambda {|item|  decrease_sell_in(item) },
-    'Backstage passes to a TAFKAL80ETC concert' => lambda {|item| decrease_sell_in(item) },
-    'Sulfuras, Hand of Ragnaros' => lambda {|item| nil },
-    'NORMAL ITEM' => lambda {|item| decrease_sell_in(item) }
-  }
+class NormalItemUpdater
+  def initialize(item)
+    @item = item
+  end
 
-  update_sell_in_actions[item.name].call(item)
+  def update
+    update_item_quality
+    update_sell_in
+    update_expired_sell_in if @item.sell_in < 0
+  end
+
+  def update_item_quality
+    decrease_quality
+  end
+
+  def update_sell_in
+    decrease_sell_in
+  end
+
+  def update_expired_sell_in
+    decrease_quality
+  end
+
+  protected
+
+  def increase_quality
+    @item.quality += 1 if @item.quality < 50
+  end
+
+  def decrease_quality
+    @item.quality -= 1 if @item.quality > 0
+  end
+
+  def decrease_sell_in
+    @item.sell_in -= 1
+  end
 end
 
-def update_expired_sell_in(item)
-  update_expired_actions = {
-    'Aged Brie' => lambda {|item|  increase_quality(item) },
-    'Backstage passes to a TAFKAL80ETC concert' => lambda {|item| item.quality = 0 },
-    'Sulfuras, Hand of Ragnaros' => lambda {|item| nil },
-    'NORMAL ITEM' => lambda {|item| decrease_quality(item) }
-  }
+class AgedBrieUpdater < NormalItemUpdater
+  def update_item_quality
+    increase_quality
+  end
 
-  update_expired_actions[item.name].call(item) if item.sell_in < 0
+  def update_expired_sell_in
+    increase_quality
+  end
 end
 
-def increase_quality(item)
-  item.quality += 1 if item.quality < 50
+class BackstageUpdater < NormalItemUpdater
+  def update_item_quality
+    increase_quality
+    increase_quality if @item.sell_in < 11
+    increase_quality if @item.sell_in < 6
+  end
+
+  def update_expired_sell_in
+    @item.quality = 0
+  end
 end
 
-def increase_quality_backstage(item)
-  increase_quality(item)
-  increase_quality(item) if item.sell_in < 11
-  increase_quality(item) if item.sell_in < 6
-end
+class SulfurusUpdater < NormalItemUpdater
+  def update_item_quality
+    nil
+  end
 
-def decrease_quality(item)
-  item.quality -= 1 if item.quality > 0
-end
+  def update_sell_in
+    nil
+  end
 
-def decrease_sell_in(item)
-  item.sell_in -= 1
+  def update_expired_sell_in
+    nil
+  end
 end
 
 # DO NOT CHANGE THINGS BELOW -----------------------------------------
